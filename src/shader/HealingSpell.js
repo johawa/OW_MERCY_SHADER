@@ -2,6 +2,9 @@ import { useRef, useState } from "react";
 import { OrbitControls, Plane, shaderMaterial } from "@react-three/drei";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import glsl from "babel-plugin-glsl/macro";
+import * as THREE from "three";
+
+import { useGLTF } from "@react-three/drei";
 
 const CustomShader = shaderMaterial(
   {
@@ -89,21 +92,47 @@ const CustomShader = shaderMaterial(
       vec4 waveColor2 = vec4(1.0, 0.8, 0.2, 1.0);
         // color += vec4(clamp(Muzzle(vUv), 0.0, 1.0));   
         
-        color += calcSine(vUv, 15.8, 0.1, 0.2, 1.6, 0.5, waveColor1, 0.25, 250.0, true);
-        color += calcSine(vUv, 10.8, 0.1, 0.2, 1.6, 0.5, waveColor1, 0.25, 75.0, true);
         color += calcSine(vUv, 15.8, 0.2, 0.2, 1.6, 0.5, waveColor2, 0.5, 50.0, true);     
-        color += calcSine(vUv, 5.8, 0.2, 0.2, 1.6, 0.5, waveColor2, 0.5, 125.0, true);     
-         gl_FragColor = vec4(color.r, color.g, color.b, 1.0);
-
-
-
-
-
+        color += calcSine(vUv, 10.8, 0.1, 0.2, 1.6, 0.5, waveColor1, 0.25, 75.0, true);
+        color += calcSine(vUv, 5.8, 0.2, 0.2, 1.6, 0.5, waveColor2, 0.5, 125.0, true);            
+        color += calcSine(vUv, 15.8, 0.2, 0.2, 1.6, 0.5, waveColor2, 0.5, 150.0, true);     
+        color += calcSine(vUv, 5.8, 0.2, 0.2, 1.6, 0.5, waveColor2, 0.5, 175.0, true);    
+      
+          color += calcSine(vUv, 7.8, 0.1, 0.2, 1.6, 0.5, waveColor1, 0.25, 150.0, true);
+        gl_FragColor = vec4(color.r, color.g, color.b, 0.0);
     }
-    `
+        `
 );
 
 extend({ CustomShader });
+
+function Bow(props) {
+  const { nodes, materials } = useGLTF("/bow.glb");
+
+  const ref = useRef(null);
+  const materialRef = useRef(null);
+
+  useFrame((state) => {
+    if (materialRef.current) {
+      const t = state.clock.getElapsedTime();
+      materialRef.current.uniforms.time.value = t;
+    }
+  });
+
+  return (
+    <mesh
+      geometry={nodes.Plane.geometry}
+      position={[3.8, 0.15, 1.9]}
+      rotation={[0, 0.04, 0.2]}
+    >
+      <customShader
+        ref={materialRef}
+        attach="material"
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
+}
 
 function Box(props) {
   const ref = useRef(null);
@@ -117,8 +146,13 @@ function Box(props) {
   });
 
   return (
-    <mesh {...props} ref={ref} rotation={[0.1, 0.2, 0.25]} position={[1.2,-2,-0.8]} >
-      <planeBufferGeometry args={[16, 2]} />
+    <mesh
+      {...props}
+      ref={ref}
+      rotation={[0.1, 0.2, 0.25]}
+      position={[1.2, -2, -1.8]}
+    >
+      <planeBufferGeometry args={[20, 2]} />
       <customShader ref={materialRef} attach="material" transparent={false} />
     </mesh>
   );
@@ -131,11 +165,13 @@ function HealingSpell() {
       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
       <pointLight position={[-10, -10, -10]} />
 
-      <Box position={[0, 0, 0]} />
+      <Bow />
+      {/* <Box position={[0, 0, 0]} /> */}
 
-      {/* <OrbitControls /> */}
+      <OrbitControls />
     </Canvas>
   );
 }
 
 export default HealingSpell;
+useGLTF.preload("/bow.glb");
