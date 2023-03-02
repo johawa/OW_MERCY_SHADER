@@ -47,46 +47,74 @@ const CustomShader = shaderMaterial(
     }
 
 
-    const float SPEED = 5.0;
-    const float FREQ = 8.0;
-    const float MAX_HEIGHT = 0.05;
-    const float THICKNESS = 0.02;
-    const float BLOOM = 1.85; // above 1 will reduce
-    const float WOBBLE = 2.0; // how much each end wobbles
     
-    float beam(vec2 uv, float max_height, float offset, float speed, float freq, float thickness) {
-      uv.y -= 0.5;
+    const vec3 top = vec3(0, 0, 0);
+    const vec3 bottom = vec3(0, 0, 0);
+    const float widthFactor = 1.5;
     
-      float height = max_height * (WOBBLE + min(1. - uv.x, 1.));
-    
-      // Ramp makes the left hand side stay at/near 0
-      float ramp = smoothstep(0., 2.0 / freq, uv.x);
-    
-      height *= ramp;
-      uv.y += sin(uv.x * freq - time * speed + offset) * height;
-    
-      float f = thickness / abs(uv.y);
-      f = pow(f, BLOOM);
-      
-      return f;
+    vec4 calcSine(vec2 uv,
+                 float speed, 
+                 float frequency,
+                 float amplitude, 
+                 float shift, 
+                 float offset,
+                 vec4 color, 
+                 float width,
+                 float exponent, 
+                 bool dir)
+    {
+        float angle = time * speed * frequency * -1.0 + (shift + uv.x) * 2.0;
+        
+        float y =  sin(angle) * amplitude + offset;
+        float clampY = clamp(0.0, y, y);
+        float diffY = y - uv.y;
+        
+        float dsqr = distance(y, uv.y);
+        float scale = 1.0;
+        
+        if(dir && diffY > 0.0)
+        {
+            dsqr = dsqr * 4.0;
+        }
+        else if(!dir && diffY < 0.0)
+        {
+            dsqr = dsqr * 4.0;
+        }
+        
+        scale = pow(smoothstep(width * widthFactor, 0.0, dsqr), exponent);
+        
+        return min(color * scale, color);
     }
 
     
 
     void main() {	    
-      float f = beam(1.0 - vUv, MAX_HEIGHT, 0., SPEED, FREQ * 1.5, THICKNESS * 0.5) + 
-			  beam(1.0 - vUv, MAX_HEIGHT, time, SPEED, FREQ, THICKNESS) +
-			  beam(1.0 - vUv, MAX_HEIGHT, time + 0.5, SPEED + 0.2, FREQ * 0.9, THICKNESS * 0.5);
+      vec4 color = vec4(mix(bottom, top, vUv.y), 0.0);
+       vec4 waveColor1 = vec4(1.0, 0.85, 0.3, 1.0);
+       vec4 waveColor2 = vec4(1.0, 0.8, 0.2, 1.0);
+
+       vec3 randomFactors = vec3(1.0, 1.0, 1.0);
 
 
-        vec3 color = f * vec3(1.0, 0.83, 0.2);
+     // vec4 blue = vec4(0.1, 0.6, 1.0, 1.0);
+
+        // color += vec4(clamp(Muzzle(vUv), 0.0, 1.0));   
         
+        color += calcSine(vUv, 15.8, 0.2, 0.2, .02, 0.5, waveColor2, 0.5, 50.0, true);     
+        // color += calcSine(vUv, 10.8, 0.1, 0.2, 1.6, 0.5, waveColor1, 0.25, 75.0, true);
+        // color += calcSine(vUv, 5.8, 0.2, 0.2, 1.6, 0.5, waveColor2, 0.5, 125.0, true);            
+        // color += calcSine(vUv, 15.8, 0.2, 0.2, 1.6, 0.5, waveColor2, 0.5, 150.0, true);     
+        // color += calcSine(vUv, 5.8, 0.2, 0.2, 1.6, 0.5, waveColor2, 0.5, 175.0, true);    
       
-       color.r *=  1.0 / (distance(vec2((1.0 - vUv.x + 0.5), (1.0 - vUv.y - 0.5) * 2.5 + 0.5), vec2(0.5)));
-       color.g *=  0.83  / (distance(vec2((1.0 - vUv.x + 0.5), (1.0 - vUv.y - 0.5) * 2.5 + 0.5), vec2(0.5)));
-       color.b *=  0.2  / (distance(vec2((1.0 - vUv.x + 0.5), (1.0 - vUv.y - 0.5) * 2.5 + 0.5), vec2(0.5)));
+        //   color += calcSine(vUv, 7.8, 0.1, 0.2, 1.6, 0.5, waveColor1, 0.25, 150.0, true);
 
-       gl_FragColor = vec4(color, 0.0);
+          // color -= vUv.x;
+
+        color.r *=  1.0 / (distance(vec2((vUv.x + 0.5 * randomFactors.x), (vUv.y - 0.5 * randomFactors.y) * 5.0 + 0.5), vec2(0.5)));
+         color.g *=  0.85 / (distance(vec2((vUv.x + 0.5 * randomFactors.x), (vUv.y - 0.5 * randomFactors.y) * 5.0 + 0.5), vec2(0.5)));
+         color.b *=  0.2 / (distance(vec2((vUv.x + 0.5 * randomFactors.x), (vUv.y - 0.5 * randomFactors.y) * 5.0 + 0.5), vec2(0.5)));
+
+        gl_FragColor = vec4(color.r, color.g, color.b, 0.0);
     }
         `
 );
@@ -110,8 +138,8 @@ function Bow(props) {
   return (
     <mesh
       geometry={nodes.Plane.geometry}
-      position={[3.5, 0.2, 1.9]}
-      rotation={[0.0, 0.04, 0.2]}
+      position={[3.8, 0.15, 1.9]}
+      rotation={[0, 0.04, 0.2]}
     >
       <customShader
         ref={materialRef}
@@ -142,7 +170,7 @@ function Box(props) {
       // rotation={[0.1, 0.2, 0.25]}
       // position={[1.2, -2, -1.8]}
     >
-      <planeBufferGeometry args={[10, 2]} />
+      <planeBufferGeometry args={[5, 2]} />
       <customShader
         ref={materialRef}
         attach="material"
@@ -170,8 +198,8 @@ function HealingSpell() {
       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
       <pointLight position={[-10, -10, -10]} />
 
-      <Bow />
-      {/* <Box position={[0, 0, 0]} /> */}
+      {/* <Bow /> */}
+      <Box position={[0, 0, 0]} />
 
       {/* <OrbitControls /> */}
     </Canvas>
