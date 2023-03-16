@@ -17,48 +17,53 @@ body,
 }
 
 #root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
   background: transparent;
-}
-
-canvas {
-  border: 2px solid red;
 }
 
 body {
   background: #f0f0f0;
+  overflow: hidden !important;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f4d4d1;
 }
 
 .App {
   font-family: "Config Condensed", sans-serif;
-  height: 100vh;
-  max-height: 100vh;
-  width: 100vw;
-  max-width: 100vw;
 
-  overflow: hidden !important;
-  background-image: url(./mercy2_cleanup.jpg);
-  background-color: aqua;
+  background-image: url(./assets/mercy_cleanup.jpg);
+
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  // background: linear-gradient(
-  //     to top left,
-  //     rgba(0, 0, 0, 0) 0%,
-  //     rgba(0, 0, 0, 0) calc(50% - 0.8px),
-  //     rgba(0, 0, 0, 1) 50%,
-  //     rgba(0, 0, 0, 0) calc(50% + 0.8px),
-  //     rgba(0, 0, 0, 0) 100%
-  //   ),
-  //   linear-gradient(
-  //     to top right,
-  //     rgba(0, 0, 0, 0) 0%,
-  //     rgba(0, 0, 0, 0) calc(50% - 0.8px),
-  //     rgba(0, 0, 0, 1) 50%,
-  //     rgba(0, 0, 0, 0) calc(50% + 0.8px),
-  //     rgba(0, 0, 0, 0) 100%
-  //   );
+  width: 1920px;
+  height: 1080px;
+  border: 2px solid black;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 1px -1px,
+    rgba(0, 0, 0, 0.14) 0px 1px 1px 0px, rgba(0, 0, 0, 0.12) 0px 1px;
+}
+
+.text__main {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+
+  div {
+    padding: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+  }
+  h3 {
+    font-size: clamp(16px, 3vw, 32px);
+
+    color: white;
+  }
 }

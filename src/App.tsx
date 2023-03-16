@@ -1,11 +1,11 @@
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import dark_power from "./assets/dark_power.mp3";
 import hurts from "./assets/hurts.mp3";
 import online from "./assets/online.mp3";
 import support from "./assets/support.mp3";
 import SelectionWheel from "./components/selectionwheel";
-import { useEventListener } from "./useEventListener";
 import HealingSpell from "./shader/HealingSpell";
+import { useEventListener } from "./hooks/useEventListener";
 import "./index.scss";
 
 function App() {
@@ -61,7 +61,7 @@ function App() {
     },
     [setShowOverlay, selection]
   );
-  // Add event listener using our hook
+
   useEventListener("keydown", handler);
   useEventListener("keyup", handlerKeyup);
 
@@ -71,8 +71,12 @@ function App() {
         {showOverlay ? (
           <SelectionWheel onSelected={setSelection} />
         ) : (
-          <div style={{ position: "absolute" }}>
-            <h3>Please Press KeyE</h3>
+          <div className="text__main">
+            <div>
+              <h3>Please Press "E"</h3>
+
+              <h3>Press Left Mouse for Damage Boost</h3>
+            </div>
           </div>
         )}
 

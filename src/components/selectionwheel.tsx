@@ -1,6 +1,4 @@
-import React, { useState, useMemo } from "react";
-
-import "./style.scss";
+import "./selectionwheel.scss";
 
 function SelectionWheel({ onSelected }: { onSelected: any }) {
   return (
